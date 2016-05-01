@@ -31,7 +31,7 @@ class ReactNativeHomework extends Component {
     componentWillMount() {
         simpleAuthClient.configure('instagram', instagram);
     }
-    clickInstagramLoginButton() {
+    pressInstagramLoginButton() {
         var token = "";
         var userData = {};
         simpleAuthClient.authorize('instagram').then(function(info) {
@@ -49,7 +49,6 @@ class ReactNativeHomework extends Component {
             let errorCode = error.code;
             let errorDescription = error.description;
         });
-
     }
     render() {
         if (!this.state.userData) {
@@ -58,13 +57,13 @@ class ReactNativeHomework extends Component {
 
         return this.renderMainView(this.state.userData);
     }
-
     renderLoginView() {
         return (
-            <View style={styles.container}>
+            <View style={mainView.container}>
                 <TouchableOpacity
-                    onPress={this.clickInstagramLoginButton.bind(this)}>
-                    <Text style={styles.loginWithInstagramButton}>Login with Instagram</Text>
+                    onPress={this.pressInstagramLoginButton.bind(this)}
+                    style={loginView.InstagramButton}>
+                    <Text style={loginView.InstagramButtonText} >Login with Instagram</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -72,28 +71,57 @@ class ReactNativeHomework extends Component {
 
     renderMainView(userData) {
         return (
-            <View style={styles.container}>
+            <View style={mainView.container}>
+                <Text style={mainView.profile_text}>
+                    Instagram Id: {userData.id}
+                </Text>
+                <Text style={mainView.profile_text}>
+                    Username: {userData.username}
+                </Text>
+
                 <Image source={{uri: userData.profile_picture}}
-                    style={styles.profile_picture} />
-                <Text style={styles.profile_text}>
-                    {JSON.stringify(userData.counts)}
+                       style={mainView.profile_picture} />
+
+                <Text style={mainView.profile_text}>
+                    我是 {userData.full_name} ，
                 </Text>
-                <Text style={styles.profile_text}>
-                    {userData.id}
+                <Text style={mainView.profile_text}>
+                    我總共有 {userData.counts.media} 則貼文，
                 </Text>
-                <Text style={styles.profile_text}>
-                    {userData.username}
+                <Text style={mainView.profile_text}>
+                    我追蹤了 {userData.counts.follows} 位使用者，
                 </Text>
-                <Text style={styles.profile_text}>
-                    {userData.full_name}
+                <Text style={mainView.profile_text}>
+                    有 {userData.counts.followed_by} 位使用者追蹤我。
                 </Text>
             </View>
         );
     }
-
 }
+/*
+ * 登入的按鈕 CSS
+ */
+var loginView = StyleSheet.create({
+    InstagramButton: {
+        borderRadius: 14,
+        backgroundColor: "#3F729B",
+        paddingBottom: 8,
+        paddingTop: 8,
+        paddingLeft: 32,
+        paddingRight: 32,
+    },
+    InstagramButtonText: {
+        fontSize: 20,
+        fontStyle: "italic",
+        textAlign: "center",
+        color: "#fff"
+    },
+});
 
-var styles = StyleSheet.create({
+/*
+ * 主頁面 CSS
+ */
+var mainView = StyleSheet.create({
     container: {
         flex: 1,
         height: 100,
@@ -104,27 +132,17 @@ var styles = StyleSheet.create({
     },
     profile_picture: {
         marginTop: 20,
+        marginBottom: 20,
         width: 150,
-        height: 150,
-    },
-    loginWithInstagramButton: {
-        fontSize: 20,
-        borderWidth: 1,
-        borderStyle: "solid",
-        borderColor: "#3F729B",
-        borderRadius: 8,
-        backgroundColor: "#3F729B",
-        paddingBottom: 6,
-        paddingTop: 6,
-        paddingLeft: 8,
-        paddingRight: 8,
-        textAlign: "center",
-        color: "#fff"
+        height: 150
     },
     profile_text: {
         "flexWrap": "wrap",
+        width: 200,
+        textAlign: "left"
         // flex: 1,
     }
 });
+
 
 AppRegistry.registerComponent('ReactNativeHomework', () => ReactNativeHomework);
