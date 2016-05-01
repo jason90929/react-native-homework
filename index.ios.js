@@ -14,85 +14,42 @@ import React, {
 } from 'react-native';
 
 var simpleAuthClient = require('react-native-simple-auth');
-// var RNInstagramOAuth = require('react-native-instagram-oauth');
 
 var instagram = {
     client_id: '4d6e40aa09d54c0d9c57d1830f26723f',
-    redirect_url: 'http://localhost:8081/'  // e.g.: 'test://init'
+    redirect_uri: 'http://localhost:8081/'  // e.g.: 'test://init'
 };
 
 class ReactNativeHomework extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            access_token: "",
-            // userData: null
+            token: "",
+            userData: null
         };
     }
     componentWillMount() {
         simpleAuthClient.configure('instagram', instagram);
     }
     clickInstagramLoginButton() {
-        // var obj = {
-        //     method: 'POST',
-        //     headers: {
-        //
-        //         'client_id': '4d6e40aa09d54c0d9c57d1830f26723f',
-        //         'redirect_uri': 'http://localhost:8081/',
-        //         'Accept': 'application/json',
-        //         'Content-Type': 'application/json',
-        //         'Origin': '',
-        //         'Host': 'api.producthunt.com'
-        //
-        // },
-        // body: JSON.stringify({
-        // 'client_id': '4d6e40aa09d54c0d9c57d1830f26723f',
-        // 'redirect_uri': 'http://localhost:8081/',
-        // 'grant_type': 'client_credentials'
-        // })
-        // };
+        var token = "";
+        var userData = {};
+        simpleAuthClient.authorize('instagram').then(function(info) {
+            // console.log(info);
+            token = info.token;
+            userData = info.data;
 
-        // fetch('https://api.instagram.com/oauth/authorize/?client_id=4d6e40aa09d54c0d9c57d1830f26723f&redirect_uri=ttp://localhost:8081/&response_type=code')
-        //     .then((res) => {
-        //         console.log(res);
-        //         // console.warn(res.access_token);
-        //         // console.warn(res.url);
-        //         // this.setState({
-        //         //     access_token: JSON.stringify(res)
-        //         // });
-        //         return res;
-        //     })
-        //     // .then((resJson) => {
-        //     //     console.log(resJson);
-        //     //     alert(resJson);
-        //     // });
 
-        simpleAuthClient.authorize('instagram').then((info) => {
-            console.log(info);
-        let token = info.token;
-        let name = info.name;
-    }).catch((error) => {
+            this.setState({
+                token: token,
+                userData: userData
+            });
+        }.bind(this)).catch((error) => {
+            console.log(error);
             let errorCode = error.code;
-        let errorDescription = error.description;
-    });
+            let errorDescription = error.description;
+        });
 
-        // RNInstagramOAuth(instagram.client_id, instagram.redirect_url, (err, access_token) => {
-        //     if (err) { console.log(err) }
-        //     alert("success");
-        //     if (access_token !== undefined) {
-        //         console.log(access_token);
-        //         alert("success");
-        //         fetch('https://api.instagram.com/v1/users/self/?access_token='+access_token)
-        //             .then((response) => response.json()).then((responseData) => {
-        //
-        //             this.setState({
-        //                 userData: responseData
-        //             });
-        //             console.log("login...");
-        //             console.log(responseData);
-        //         });
-        //     }
-        // });
     }
     render() {
         if (!this.state.userData) {
@@ -105,23 +62,33 @@ class ReactNativeHomework extends Component {
     renderLoginView() {
         return (
             <View style={styles.container}>
-    <TouchableOpacity onPress={this.clickInstagramLoginButton}>
-    <Text>Login with Instagram</Text>
-        <Text>{JSON.stringify(this.access_token)}</Text>
-
-        </TouchableOpacity>
-        </View>
-    );
+                <TouchableOpacity
+                    onPress={this.clickInstagramLoginButton.bind(this)}>
+                    <Text style={styles.loginWithInstagramButton}>Login with Instagram</Text>
+                </TouchableOpacity>
+            </View>
+        );
     }
 
     renderMainView(userData) {
         return (
             <View style={styles.container}>
-    <Text>
-        {userData}
-        </Text>
-        </View>
-    );
+                <Image source={{uri: userData.profile_picture}}
+                    style={styles.profile_picture} />
+                <Text style={styles.profile_text}>
+                    {JSON.stringify(userData.counts)}
+                </Text>
+                <Text style={styles.profile_text}>
+                    {userData.id}
+                </Text>
+                <Text style={styles.profile_text}>
+                    {userData.username}
+                </Text>
+                <Text style={styles.profile_text}>
+                    {userData.full_name}
+                </Text>
+            </View>
+        );
     }
 
 }
@@ -129,22 +96,34 @@ class ReactNativeHomework extends Component {
 var styles = StyleSheet.create({
     container: {
         flex: 1,
-        flexDirection: 'row',
+        height: 100,
+        // flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#F5FCFF',
     },
-    thumbnail: {
-        width: 53,
-        height: 81,
+    profile_picture: {
+        marginTop: 20,
+        width: 150,
+        height: 150,
     },
     loginWithInstagramButton: {
-        // backgroundColor: "",
         fontSize: 20,
         borderWidth: 1,
         borderStyle: "solid",
-        borderColor: "#000",
-        textAlign: "center"
+        borderColor: "#3F729B",
+        borderRadius: 8,
+        backgroundColor: "#3F729B",
+        paddingBottom: 6,
+        paddingTop: 6,
+        paddingLeft: 8,
+        paddingRight: 8,
+        textAlign: "center",
+        color: "#fff"
+    },
+    profile_text: {
+        "flexWrap": "wrap",
+        // flex: 1,
     }
 });
 
