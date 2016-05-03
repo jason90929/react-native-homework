@@ -25,6 +25,8 @@
 		387287C371164959B880CCF1 /* libRCTCamera.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C5F11FECF6CE4E1B9A7996B2 /* libRCTCamera.a */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		9620FE911CD8561B00DD3574 /* AssetLibraryToBase64.m in Sources */ = {isa = PBXBuildFile; fileRef = 9620FE901CD8561B00DD3574 /* AssetLibraryToBase64.m */; };
+		9620FE9A1CD8B45700DD3574 /* RNKeyboardEventsManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9620FE991CD8B45700DD3574 /* RNKeyboardEventsManager.m */; };
+		9620FEA01CD8EC0100DD3574 /* RNInstagramShare.m in Sources */ = {isa = PBXBuildFile; fileRef = 9620FE9F1CD8EC0100DD3574 /* RNInstagramShare.m */; };
 		965512711CD5D13600737E0C /* SimpleAuthWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 965512701CD5D13600737E0C /* SimpleAuthWrapper.m */; };
 /* End PBXBuildFile section */
 
@@ -141,6 +143,10 @@
 		8E7E581F0A574768FE2F493B /* Pods_ReactNativeHomework.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ReactNativeHomework.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9300049455CE4627971EB581 /* RCTCamera.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTCamera.xcodeproj; path = "../node_modules/react-native-camera/ios/RCTCamera.xcodeproj"; sourceTree = "<group>"; };
 		9620FE901CD8561B00DD3574 /* AssetLibraryToBase64.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AssetLibraryToBase64.m; path = "../node_modules/react-native-asset-library-to-base64/ios/AssetLibraryToBase64.m"; sourceTree = "<group>"; };
+		9620FE981CD8B45700DD3574 /* RNKeyboardEventsManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RNKeyboardEventsManager.h; path = "../node_modules/react-native-keyboardevents/RNKeyboardEventsManager.h"; sourceTree = "<group>"; };
+		9620FE991CD8B45700DD3574 /* RNKeyboardEventsManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RNKeyboardEventsManager.m; path = "../node_modules/react-native-keyboardevents/RNKeyboardEventsManager.m"; sourceTree = "<group>"; };
+		9620FE9E1CD8EC0100DD3574 /* RNInstagramShare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RNInstagramShare.h; path = "../node_modules/react-native-instagram-share/RNInstagramShare/RNInstagramShare.h"; sourceTree = "<group>"; };
+		9620FE9F1CD8EC0100DD3574 /* RNInstagramShare.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RNInstagramShare.m; path = "../node_modules/react-native-instagram-share/RNInstagramShare/RNInstagramShare.m"; sourceTree = "<group>"; };
 		9655126F1CD5D13600737E0C /* SimpleAuthWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SimpleAuthWrapper.h; sourceTree = "<group>"; };
 		965512701CD5D13600737E0C /* SimpleAuthWrapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SimpleAuthWrapper.m; sourceTree = "<group>"; };
 		C5F11FECF6CE4E1B9A7996B2 /* libRCTCamera.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRCTCamera.a; sourceTree = "<group>"; };
@@ -291,6 +297,10 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				9620FE9E1CD8EC0100DD3574 /* RNInstagramShare.h */,
+				9620FE9F1CD8EC0100DD3574 /* RNInstagramShare.m */,
+				9620FE981CD8B45700DD3574 /* RNKeyboardEventsManager.h */,
+				9620FE991CD8B45700DD3574 /* RNKeyboardEventsManager.m */,
 				9620FE901CD8561B00DD3574 /* AssetLibraryToBase64.m */,
 				9655126F1CD5D13600737E0C /* SimpleAuthWrapper.h */,
 				965512701CD5D13600737E0C /* SimpleAuthWrapper.m */,
@@ -658,7 +668,9 @@
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
 				965512711CD5D13600737E0C /* SimpleAuthWrapper.m in Sources */,
+				9620FE9A1CD8B45700DD3574 /* RNKeyboardEventsManager.m in Sources */,
 				9620FE911CD8561B00DD3574 /* AssetLibraryToBase64.m in Sources */,
+				9620FEA01CD8EC0100DD3574 /* RNInstagramShare.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -13,12 +13,15 @@ import React, {
     View,
     ScrollView,
     TextInput,
-    TouchableOpacity,
+    TouchableOpacity
 } from 'react-native';
 
 // ES5 import
 var simpleAuthClient = require('react-native-simple-auth');
 var ReadImageData = require('NativeModules').ReadImageData;
+var KeyboardEvents = require('react-native-keyboardevents');
+var KeyboardEventEmitter = KeyboardEvents.Emitter;
+var RNInstagramShare = require('react-native-instagram-share');
 // ES6 import
 import Camera from 'react-native-camera';
 
@@ -34,12 +37,36 @@ class ReactNativeHomework extends Component {
             status: 0,
             token: "",
             userData: null,
-            postText: "",
-            picture: ""
+            caption: "",
+            imagePath: "",
+            imageBase64: "",
+            keyboardSpace: 0
         };
+
+        this.updateKeyboardSpace = this.updateKeyboardSpace.bind(this);
+        this.resetKeyboardSpace = this.resetKeyboardSpace.bind(this);
     }
-    componentWillMount() {
+    componentDidMount() {
         simpleAuthClient.configure('instagram', instagram);
+
+        KeyboardEventEmitter.on(KeyboardEvents.KeyboardDidShowEvent, this.updateKeyboardSpace);
+        KeyboardEventEmitter.on(KeyboardEvents.KeyboardWillHideEvent, this.resetKeyboardSpace);
+    }
+
+    componentWillUnmount() {
+        KeyboardEventEmitter.off(KeyboardEvents.KeyboardDidShowEvent, this.updateKeyboardSpace);
+        KeyboardEventEmitter.off(KeyboardEvents.KeyboardWillHideEvent, this.resetKeyboardSpace);
+    }
+    updateKeyboardSpace(frames) {
+        if (frames.end) {
+            this.setState({keyboardSpace: frames.end.height});
+        } else {
+            this.setState({keyboardSpace: frames.endCoordinates.height});
+        }
+    }
+
+    resetKeyboardSpace() {
+        this.setState({keyboardSpace: 0});
     }
     // 登入 Instagram
     pressInstagramLoginButton() {
@@ -75,9 +102,11 @@ class ReactNativeHomework extends Component {
         this.camera.capture()
             .then(function(data) {
                 // 從檔案路徑取得 base64 圖檔
-                ReadImageData.readImage(data.path, function(imageBase64) {
+                var path = data.path;
+                ReadImageData.readImage(path, function(imageBase64) {
                     this.setState({
-                        picture: imageBase64,
+                        imagePath: path,
+                        imageBase64: imageBase64,
                         status: 3
                     });
                 }.bind(this));
@@ -88,11 +117,10 @@ class ReactNativeHomework extends Component {
     }
     // 上傳至 Instagram
     uploadToInstagram() {
-        var object = {};
-        object.picture = this.state.picture;
-        object.postText = this.state.postText;
-
-        console.log(object);
+        var image = this.state.imagePath;
+        var caption = this.state.caption;
+        
+        RNInstagramShare.share(image, caption);
     }
     render() {
         switch (this.state.status) {
@@ -118,7 +146,7 @@ class ReactNativeHomework extends Component {
                 <TouchableOpacity
                     onPress={this.pressInstagramLoginButton.bind(this)}
                     style={loginView.InstagramButton}>
-                    <Text style={loginView.InstagramButtonText} >Login with Instagram</Text>
+                    <Text style={loginView.InstagramButtonText}>Login with Instagram</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -126,7 +154,7 @@ class ReactNativeHomework extends Component {
 
     renderMainView(userData) {
         return (
-            <View style={mainView.container}>
+            <ScrollView style={mainView.scrollContainer}>
                 <Text style={mainView.item}>
                     Instagram Id: {userData.id}
                 </Text>
@@ -138,16 +166,16 @@ class ReactNativeHomework extends Component {
                        style={mainView.profilePicture} />
 
                 <Text style={mainView.profileText}>
-                    我是 {userData.full_name} ，
+                    我是 {userData.full_name}
                 </Text>
                 <Text style={mainView.profileText}>
-                    我總共有 {userData.counts.media} 則貼文，
+                    我總共有 {userData.counts.media} 則貼文
                 </Text>
                 <Text style={mainView.profileText}>
-                    我追蹤了 {userData.counts.follows} 位使用者，
+                    我追蹤了 {userData.counts.follows} 位使用者
                 </Text>
                 <Text style={mainView.profileText}>
-                    有 {userData.counts.followed_by} 位使用者追蹤我。
+                    有 {userData.counts.followed_by} 位使用者追蹤我
                 </Text>
 
                 <TouchableOpacity
@@ -155,7 +183,7 @@ class ReactNativeHomework extends Component {
                     style={mainView.cameraButton}>
                     <Text style={mainView.cameraButtonText}>分享你今天的生活！</Text>
                 </TouchableOpacity>
-            </View>
+            </ScrollView>
         );
     }
 
@@ -180,22 +208,25 @@ class ReactNativeHomework extends Component {
 
     renderCreateNewPostView() {
         return (
-            <View style={mainView.topContainer}>
-                <Image source={{uri: "data:image/jpeg;base64, " + this.state.picture}}
+            <ScrollView style={mainView.scrollContainer}
+                        keyboardDismissMode="interactive">
+                <Image source={{uri: "data:image/jpeg;base64, " + this.state.imageBase64}}
                        style={mainView.capturedPicture} />
 
                 <TextInput style={{height: 40, borderColor: 'gray', borderWidth: 1}}
-                           onChangeText={(postText) => this.setState({postText})}
+                           onChangeText={(caption) => this.setState({caption})}
                            multiline={true}
-                           value={this.state.postText} placeholder="在想些什麼？">
+                           value={this.state.caption} placeholder="在想些什麼？">
 
                 </TextInput>
                 <TouchableOpacity
-                    onPress={this.uploadToInstagram}
+                    onPress={this.uploadToInstagram.bind(this)}
                     style={mainView.cameraButton}>
                     <Text style={mainView.cameraButtonText}>上傳至Instagram</Text>
                 </TouchableOpacity>
-            </View>
+
+                <View style={{height: this.state.keyboardSpace}}></View>
+            </ScrollView>
         );
     }
 }
@@ -230,24 +261,23 @@ var mainView = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: '#F5FCFF'
     },
-    topContainer: {
+    scrollContainer: {
         flex: 1,
-        justifyContent: 'flex-start',
-        alignItems: 'center',
-        backgroundColor: '#F5FCFF'
+        marginTop: 20,
+        backgroundColor: '#F5FCFF',
     },
     title: {
         fontSize: 12
     },
     profilePicture: {
-        marginTop: 20,
+        marginTop: 6,
         marginBottom: 20,
         width: Dimensions.get('window').width,
         height: Dimensions.get('window').width //與寬度同等
     },
     profileText: {
         flexWrap: "wrap",
-        textAlign: "left",
+        textAlign: "center",
         marginTop: 6,
         marginBottom: 6
     },
