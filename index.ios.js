@@ -11,12 +11,14 @@ import React, {
     StyleSheet,
     Text,
     View,
+    ScrollView,
     TextInput,
     TouchableOpacity,
 } from 'react-native';
 
 // ES5 import
 var simpleAuthClient = require('react-native-simple-auth');
+var ReadImageData = require('NativeModules').ReadImageData;
 // ES6 import
 import Camera from 'react-native-camera';
 
@@ -32,12 +34,14 @@ class ReactNativeHomework extends Component {
             status: 0,
             token: "",
             userData: null,
-            postText: ""
+            postText: "",
+            picture: ""
         };
     }
     componentWillMount() {
         simpleAuthClient.configure('instagram', instagram);
     }
+    // 登入 Instagram
     pressInstagramLoginButton() {
         var token = "";
         var userData = {};
@@ -53,23 +57,42 @@ class ReactNativeHomework extends Component {
                 });
             }.bind(this))
             .catch((error) => {
-                console.error(error);
+                this.setState({
+                    status: 0
+                });
                 let errorCode = error.code;
                 let errorDescription = error.description;
             });
     }
+    // 按下啟動相機按鈕
     pressLaunceCameraButton() {
+        this.setState({
+            status: 2
+        });
+    }
+    // 照相
+    takePicture() {
         this.camera.capture()
             .then(function(data) {
-                console.log(data);
-            }).then(function() {
-                this.setState({
-                    status: 2
-                })
+                // 從檔案路徑取得 base64 圖檔
+                ReadImageData.readImage(data.path, function(imageBase64) {
+                    this.setState({
+                        picture: imageBase64,
+                        status: 3
+                    });
+                }.bind(this));
             }.bind(this))
             .catch(error => {
                 console.error(error);
             });
+    }
+    // 上傳至 Instagram
+    uploadToInstagram() {
+        var object = {};
+        object.picture = this.state.picture;
+        object.postText = this.state.postText;
+
+        console.log(object);
     }
     render() {
         switch (this.state.status) {
@@ -80,7 +103,10 @@ class ReactNativeHomework extends Component {
                 return this.renderMainView(this.state.userData);
                 break;
             case 2:
-                return this.renderNewPostView();
+                return this.renderTakePictureView();
+                break;
+            case 3:
+                return this.renderCreateNewPostView();
                 break;
             default:
                 return this.renderLoginView();
@@ -101,44 +127,39 @@ class ReactNativeHomework extends Component {
     renderMainView(userData) {
         return (
             <View style={mainView.container}>
-                <Text style={mainView.profile_text}>
+                <Text style={mainView.item}>
                     Instagram Id: {userData.id}
                 </Text>
-                <Text style={mainView.profile_text}>
+                <Text style={mainView.item}>
                     Username: {userData.username}
                 </Text>
 
                 <Image source={{uri: userData.profile_picture}}
-                       style={mainView.profile_picture} />
+                       style={mainView.profilePicture} />
 
-                <Text style={mainView.profile_text}>
+                <Text style={mainView.profileText}>
                     我是 {userData.full_name} ，
                 </Text>
-                <Text style={mainView.profile_text}>
+                <Text style={mainView.profileText}>
                     我總共有 {userData.counts.media} 則貼文，
                 </Text>
-                <Text style={mainView.profile_text}>
+                <Text style={mainView.profileText}>
                     我追蹤了 {userData.counts.follows} 位使用者，
                 </Text>
-                <Text style={mainView.profile_text}>
+                <Text style={mainView.profileText}>
                     有 {userData.counts.followed_by} 位使用者追蹤我。
                 </Text>
 
                 <TouchableOpacity
                     onPress={this.pressLaunceCameraButton.bind(this)}
                     style={mainView.cameraButton}>
-                    <Camera
-                        ref={(cam) => {
-                        this.camera = cam;
-                    }}>
-                        <Text style={mainView.cameraButtonText}>分享你今天的生活！</Text>
-                    </Camera>
+                    <Text style={mainView.cameraButtonText}>分享你今天的生活！</Text>
                 </TouchableOpacity>
             </View>
         );
     }
 
-    renderNewPostView() {
+    renderTakePictureView() {
         return (
             <View style={mainView.container}>
                 <Camera
@@ -148,14 +169,31 @@ class ReactNativeHomework extends Component {
                     style={mainView.preview}
                     aspect={Camera.constants.Aspect.fill}>
                 </Camera>
+                <TouchableOpacity
+                    onPress={this.takePicture.bind(this)}
+                    style={mainView.cameraButton}>
+                    <Text style={mainView.cameraButtonText}>拍照</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }
+
+    renderCreateNewPostView() {
+        return (
+            <View style={mainView.topContainer}>
+                <Image source={{uri: "data:image/jpeg;base64, " + this.state.picture}}
+                       style={mainView.capturedPicture} />
+
                 <TextInput style={{height: 40, borderColor: 'gray', borderWidth: 1}}
-                    onChangeText={(postText) => this.setState({postText})}
-                    value={this.state.postText} placeholder="在想些什麼？">
+                           onChangeText={(postText) => this.setState({postText})}
+                           multiline={true}
+                           value={this.state.postText} placeholder="在想些什麼？">
 
                 </TextInput>
                 <TouchableOpacity
+                    onPress={this.uploadToInstagram}
                     style={mainView.cameraButton}>
-                        <Text style={mainView.cameraButtonText}>TODO: 張貼！</Text>
+                    <Text style={mainView.cameraButtonText}>上傳至Instagram</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -192,17 +230,26 @@ var mainView = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: '#F5FCFF'
     },
-    profile_picture: {
+    topContainer: {
+        flex: 1,
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        backgroundColor: '#F5FCFF'
+    },
+    title: {
+        fontSize: 12
+    },
+    profilePicture: {
         marginTop: 20,
         marginBottom: 20,
         width: Dimensions.get('window').width,
         height: Dimensions.get('window').width //與寬度同等
     },
-    profile_text: {
+    profileText: {
         flexWrap: "wrap",
         textAlign: "left",
-        marginTop: 10,
-        marginBottom: 10
+        marginTop: 6,
+        marginBottom: 6
     },
     cameraButton: {
         marginTop: 20
@@ -212,10 +259,8 @@ var mainView = StyleSheet.create({
         textAlign: "center"
     },
     preview: {
-        // flex: 1,
         top: 0,
         justifyContent: 'flex-start',
-        // alignItems: 'top',
         width: Dimensions.get('window').width,
         height: Dimensions.get('window').width //與寬度同等
     },
@@ -226,6 +271,12 @@ var mainView = StyleSheet.create({
         color: '#000',
         padding: 10,
         margin: 40
+    },
+    capturedPicture: {
+        // top: 0,
+        justifyContent: 'flex-start',
+        width: Dimensions.get('window').width,
+        height: Dimensions.get('window').width //與寬度同等
     }
 });
 
