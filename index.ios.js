@@ -12,16 +12,13 @@ import React, {
     Text,
     View,
     ScrollView,
-    TextInput,
     TouchableOpacity
 } from 'react-native';
 
 // ES5 import
 var simpleAuthClient = require('react-native-simple-auth');
-var ReadImageData = require('NativeModules').ReadImageData;
-var KeyboardEvents = require('react-native-keyboardevents');
-var KeyboardEventEmitter = KeyboardEvents.Emitter;
 var RNInstagramShare = require('react-native-instagram-share');
+
 // ES6 import
 import Camera from 'react-native-camera';
 
@@ -38,35 +35,11 @@ class ReactNativeHomework extends Component {
             token: "",
             userData: null,
             caption: "",
-            imagePath: "",
-            imageBase64: "",
-            keyboardSpace: 0
+            imagePath: ""
         };
-
-        this.updateKeyboardSpace = this.updateKeyboardSpace.bind(this);
-        this.resetKeyboardSpace = this.resetKeyboardSpace.bind(this);
     }
     componentDidMount() {
         simpleAuthClient.configure('instagram', instagram);
-
-        KeyboardEventEmitter.on(KeyboardEvents.KeyboardDidShowEvent, this.updateKeyboardSpace);
-        KeyboardEventEmitter.on(KeyboardEvents.KeyboardWillHideEvent, this.resetKeyboardSpace);
-    }
-
-    componentWillUnmount() {
-        KeyboardEventEmitter.off(KeyboardEvents.KeyboardDidShowEvent, this.updateKeyboardSpace);
-        KeyboardEventEmitter.off(KeyboardEvents.KeyboardWillHideEvent, this.resetKeyboardSpace);
-    }
-    updateKeyboardSpace(frames) {
-        if (frames.end) {
-            this.setState({keyboardSpace: frames.end.height});
-        } else {
-            this.setState({keyboardSpace: frames.endCoordinates.height});
-        }
-    }
-
-    resetKeyboardSpace() {
-        this.setState({keyboardSpace: 0});
     }
     // 登入 Instagram
     pressInstagramLoginButton() {
@@ -97,20 +70,26 @@ class ReactNativeHomework extends Component {
             status: 2
         });
     }
-    // 照相
+    // 照相事件
     takePicture() {
         this.camera.capture()
-            .then(function(data) {
+            .then(function (data) {
                 var image = data.path;
                 var caption = "Test caption";
 
-                // 上傳至 Instagram
+                // 啟動並上傳至 Instagram
                 RNInstagramShare.share(image, caption);
             }.bind(this))
             .catch(error => {
                 console.error(error);
             });
     }
+    /*
+     * 依照 status 決定要刷什麼頁面
+     * 0: 登入畫面
+     * 1: 已登入的主頁面
+     * 2: 相機畫面
+     */
     render() {
         switch (this.state.status) {
             case 0:
@@ -126,6 +105,7 @@ class ReactNativeHomework extends Component {
                 return this.renderLoginView();
         }
     }
+    // 起始頁面(登入)
     renderLoginView() {
         return (
             <View style={mainView.container}>
@@ -137,7 +117,7 @@ class ReactNativeHomework extends Component {
             </View>
         );
     }
-
+    // 主要頁面
     renderMainView(userData) {
         return (
             <ScrollView style={mainView.scrollContainer}>
@@ -165,14 +145,13 @@ class ReactNativeHomework extends Component {
                 </Text>
 
                 <TouchableOpacity
-                    onPress={this.pressLaunceCameraButton.bind(this)}
-                    style={mainView.cameraButton}>
-                    <Text style={mainView.cameraButtonText}>分享你今天的生活！</Text>
+                    onPress={this.pressLaunceCameraButton.bind(this)}>
+                    <Text style={mainView.launchCameraButton}>分享你今天的生活！</Text>
                 </TouchableOpacity>
             </ScrollView>
         );
     }
-
+    // 顯示照相頁面
     renderTakePictureView() {
         return (
             <View style={{flex: 1}}>
@@ -180,9 +159,9 @@ class ReactNativeHomework extends Component {
                     ref={(cam) => {
                         this.camera = cam;
                     }}
-                    style={mainView.preview}
+                    style={cameraView.preview}
                     aspect={Camera.constants.Aspect.fill}>
-                    <Text style={mainView.capture} onPress={this.takePicture.bind(this)}>[CAPTURE]</Text>
+                    <Text style={cameraView.capture} onPress={this.takePicture.bind(this)}>Share to Instagram</Text>
                 </Camera>
             </View>
         );
@@ -222,10 +201,7 @@ var mainView = StyleSheet.create({
     scrollContainer: {
         flex: 1,
         marginTop: 20,
-        backgroundColor: '#F5FCFF',
-    },
-    title: {
-        fontSize: 12
+        backgroundColor: '#F5FCFF'
     },
     profilePicture: {
         marginTop: 6,
@@ -239,13 +215,21 @@ var mainView = StyleSheet.create({
         marginTop: 6,
         marginBottom: 6
     },
-    cameraButton: {
-        marginTop: 20
-    },
-    cameraButtonText: {
+    launchCameraButton: {
+        marginTop: 20,
         fontSize: 18,
-        textAlign: "center"
-    },
+        textAlign: "center",
+        padding: 10,
+        width: Dimensions.get('window').width,
+        backgroundColor: '#3F729B',
+        color: "#fff"
+    }
+});
+
+/*
+ * 相機 CSS
+ */
+var cameraView = StyleSheet.create({
     preview: {
         flex: 1,
         justifyContent: 'flex-end',
@@ -259,15 +243,9 @@ var mainView = StyleSheet.create({
         borderRadius: 5,
         color: '#000',
         padding: 10,
-        margin: 40
-    },
-    capturedPicture: {
-        // top: 0,
-        justifyContent: 'flex-start',
-        width: Dimensions.get('window').width,
-        height: Dimensions.get('window').width //與寬度同等
+        margin: 40,
+        fontSize: 10
     }
 });
-
 
 AppRegistry.registerComponent('ReactNativeHomework', () => ReactNativeHomework);
