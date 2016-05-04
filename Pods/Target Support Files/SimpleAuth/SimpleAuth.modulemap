@@ -3,4 +3,7 @@ framework module SimpleAuth {
 
   export *
   module * { export * }
+
+  private header "SimpleAuthInstagramLoginViewController.h"
+  private header "SimpleAuthInstagramProvider.h"
 }
