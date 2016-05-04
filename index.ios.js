@@ -101,26 +101,15 @@ class ReactNativeHomework extends Component {
     takePicture() {
         this.camera.capture()
             .then(function(data) {
-                // 從檔案路徑取得 base64 圖檔
-                var path = data.path;
-                ReadImageData.readImage(path, function(imageBase64) {
-                    this.setState({
-                        imagePath: path,
-                        imageBase64: imageBase64,
-                        status: 3
-                    });
-                }.bind(this));
+                var image = data.path;
+                var caption = "Test caption";
+
+                // 上傳至 Instagram
+                RNInstagramShare.share(image, caption);
             }.bind(this))
             .catch(error => {
                 console.error(error);
             });
-    }
-    // 上傳至 Instagram
-    uploadToInstagram() {
-        var image = this.state.imagePath;
-        var caption = this.state.caption;
-        
-        RNInstagramShare.share(image, caption);
     }
     render() {
         switch (this.state.status) {
@@ -132,9 +121,6 @@ class ReactNativeHomework extends Component {
                 break;
             case 2:
                 return this.renderTakePictureView();
-                break;
-            case 3:
-                return this.renderCreateNewPostView();
                 break;
             default:
                 return this.renderLoginView();
@@ -189,44 +175,16 @@ class ReactNativeHomework extends Component {
 
     renderTakePictureView() {
         return (
-            <View style={mainView.container}>
+            <View style={{flex: 1}}>
                 <Camera
                     ref={(cam) => {
                         this.camera = cam;
                     }}
                     style={mainView.preview}
                     aspect={Camera.constants.Aspect.fill}>
+                    <Text style={mainView.capture} onPress={this.takePicture.bind(this)}>[CAPTURE]</Text>
                 </Camera>
-                <TouchableOpacity
-                    onPress={this.takePicture.bind(this)}
-                    style={mainView.cameraButton}>
-                    <Text style={mainView.cameraButtonText}>拍照</Text>
-                </TouchableOpacity>
             </View>
-        );
-    }
-
-    renderCreateNewPostView() {
-        return (
-            <ScrollView style={mainView.scrollContainer}
-                        keyboardDismissMode="interactive">
-                <Image source={{uri: "data:image/jpeg;base64, " + this.state.imageBase64}}
-                       style={mainView.capturedPicture} />
-
-                <TextInput style={{height: 40, borderColor: 'gray', borderWidth: 1}}
-                           onChangeText={(caption) => this.setState({caption})}
-                           multiline={true}
-                           value={this.state.caption} placeholder="在想些什麼？">
-
-                </TextInput>
-                <TouchableOpacity
-                    onPress={this.uploadToInstagram.bind(this)}
-                    style={mainView.cameraButton}>
-                    <Text style={mainView.cameraButtonText}>上傳至Instagram</Text>
-                </TouchableOpacity>
-
-                <View style={{height: this.state.keyboardSpace}}></View>
-            </ScrollView>
         );
     }
 }
@@ -289,10 +247,11 @@ var mainView = StyleSheet.create({
         textAlign: "center"
     },
     preview: {
-        top: 0,
-        justifyContent: 'flex-start',
-        width: Dimensions.get('window').width,
-        height: Dimensions.get('window').width //與寬度同等
+        flex: 1,
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        height: Dimensions.get('window').height,
+        width: Dimensions.get('window').width
     },
     capture: {
         flex: 0,
